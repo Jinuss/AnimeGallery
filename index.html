@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b14" />
+  <meta name="description" content="AnimeGallery — 分门别类的精选动漫壁纸浏览 H5" />
+  <title>AnimeGallery · 动漫壁纸</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <!-- 顶部光晕装饰 -->
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- ============ 顶部导航 ============ -->
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a class="nav__logo" href="#top">
+        <span class="nav__logo-mark">✦</span>
+        <span class="nav__logo-text">Anime<em>Gallery</em></span>
+      </a>
+      <div class="nav__search">
+        <svg class="nav__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 21l-4.35-4.35M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input id="searchInput" type="search" placeholder="搜索壁纸 / 标签" autocomplete="off" />
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ Hero ============ -->
+  <section class="hero" id="top">
+    <div class="hero__inner">
+      <span class="hero__badge">✦ 精选动漫壁纸集</span>
+      <h1 class="hero__title">分门别类<br/>邂逅每一帧<em>心动</em>。</h1>
+      <p class="hero__subtitle">人物 · 风景 · 机甲 · 赛博 · 古风 · 治愈 — 在这里找到属于你屏幕的那一帧。</p>
+      <div class="hero__stats">
+        <div class="hero__stat"><strong id="statTotal">0</strong><span>精选壁纸</span></div>
+        <div class="hero__stat"><strong id="statCat">0</strong><span>分类主题</span></div>
+        <div class="hero__stat"><strong>4K</strong><span>高清画质</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 分类导航 ============ -->
+  <nav class="cats" id="cats" aria-label="壁纸分类">
+    <div class="cats__track" id="catsTrack"></div>
+  </nav>
+
+  <!-- ============ 壁纸瀑布流 ============ -->
+  <main class="gallery" id="gallery">
+    <div class="gallery__masonry" id="masonry"></div>
+    <div class="gallery__empty" id="empty" hidden>
+      <span class="gallery__empty-icon">∅</span>
+      <p>没有找到符合条件的壁纸</p>
+      <button class="btn btn--ghost" id="resetBtn">重置筛选</button>
+    </div>
+  </main>
+
+  <!-- ============ 加载骨架 ============ -->
+  <div class="loader" id="loader" hidden><span></span></div>
+
+  <!-- ============ 详情弹窗 ============ -->
+  <div class="modal" id="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal__overlay" data-close></div>
+    <article class="modal__card">
+      <button class="modal__close" data-close aria-label="关闭">✕</button>
+      <div class="modal__img-wrap">
+        <img id="modalImg" alt="" loading="lazy" />
+        <div class="modal__img-loader"><span></span></div>
+      </div>
+      <div class="modal__body">
+        <div class="modal__cat" id="modalCat"></div>
+        <h2 class="modal__title" id="modalTitle"></h2>
+        <p class="modal__desc" id="modalDesc"></p>
+        <div class="modal__tags" id="modalTags"></div>
+        <div class="modal__actions">
+          <a class="btn btn--primary" id="modalDownload" download>下载壁纸</a>
+          <button class="btn btn--ghost" id="modalFav">收藏</button>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- ============ 回到顶部 ============ -->
+  <button class="to-top" id="toTop" aria-label="回到顶部" hidden>↑</button>
+
+  <!-- ============ 页脚 ============ -->
+  <footer class="footer">
+    <p class="footer__brand">✦ AnimeGallery</p>
+    <p class="footer__note">图片由 AI 生成，仅作浏览展示。© <span id="year"></span> AnimeGallery</p>
+  </footer>
+
+  <script src="./js/data.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
