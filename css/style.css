@@ -146,7 +146,7 @@ em { font-style: italic; }
 /* ========================================================================
    Hero
    ======================================================================== */
-.hero { position: relative; padding: var(--sp-20) var(--sp-4) var(--sp-12); }
+.hero { position: relative; padding: var(--sp-5) var(--sp-4) var(--sp-10) var(--sp-12); }
 .hero__inner { max-width: var(--maxw); margin: 0 auto; }
 .hero__badge {
   display: inline-flex; align-items: center; gap: 6px;
