@@ -5,7 +5,8 @@
 (function () {
   "use strict";
 
-  const { CATEGORIES, WALLPAPERS } = window.__DATA__;
+  const { CATEGORIES, loadWallpapers } = window.__DATA__;
+  let WALLPAPERS = [];
 
   /* ---------- DOM 引用 ---------- */
   const $ = (sel) => document.querySelector(sel);
@@ -30,7 +31,8 @@
     modalDownload: $("#modalDownload"),
     modalFav: $("#modalFav"),
     imgLoader: $(".modal__img-loader"),
-    year: $("#year")
+    loader: $("#loader"),
+    year: $("#year"),
   };
 
   /* ---------- 状态 ---------- */
@@ -85,10 +87,10 @@
 
     if (!list.length) {
       els.masonry.innerHTML = "";
-      els.empty.hidden = false;
+      els.empty.style.display = "block";
       return;
     }
-    els.empty.hidden = true;
+    els.empty.style.display = "none";
 
     els.masonry.innerHTML = list.map((w, i) => `
       <article class="card" data-id="${w.id}" style="animation-delay:${Math.min(i, 12) * 60}ms">
@@ -212,11 +214,15 @@
       if (btn) selectCat(btn.dataset.cat);
     });
 
-    // 搜索（防抖）
+    // 搜索（防抖）—— 搜索视为全局行为，自动回到"全部"分类，避免与分类叠加产生空状态
     let timer;
     els.searchInput.addEventListener("input", (e) => {
       clearTimeout(timer);
       timer = setTimeout(() => {
+        if (state.activeCat !== "all") {
+          state.activeCat = "all";
+          $$(".cat").forEach(b => b.classList.toggle("is-active", b.dataset.cat === "all"));
+        }
         state.keyword = e.target.value;
         renderCards();
       }, 180);
@@ -263,7 +269,19 @@
   }
 
   /* ---------- 启动 ---------- */
-  function init() {
+  function showLoader(on) {
+    if (els.loader) els.loader.style.display = !on ? "block" : "none";
+    if (on) els.empty.style.display = "none";
+  }
+
+  async function init() {
+    showLoader(true);
+    try {
+      WALLPAPERS = await loadWallpapers();
+    } catch (e) {
+      console.error("壁纸加载失败:", e);
+    }
+    showLoader(false);
     renderStats();
     renderCats();
     renderCards();
