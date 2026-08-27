@@ -40,7 +40,7 @@
   };
 
   /* ---------- 状态 ---------- */
-  const PAGE_SIZE = 6; // 每页卡片数量
+  const PAGE_SIZE = 20; // 每页卡片数量
   const PAGER_VISIBLE = 1; // 当前页前后各显示多少个页码
 
   const state = {
