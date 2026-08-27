@@ -185,21 +185,31 @@
     return parseFloat(v) || 64;
   }
 
-  /* ---------- 图片加载：移除骨架屏 ---------- */
+  /* ---------- 图片加载：骨架屏淡出 / 错误占位 ---------- */
   function attachImgHandlers(img) {
     const card = img.closest(".card");
     const skel = card && card.querySelector(".card__skeleton");
-    const done = () => {
+    const imgWrap = img.closest(".card__img-wrap");
+
+    const finish = () => {
       img.classList.add("loaded");
+      if (!skel) return;
+      skel.classList.add("fade-out");
+      skel.addEventListener("transitionend", () => skel.remove(), { once: true });
+    };
+
+    const fail = () => {
+      if (imgWrap) imgWrap.classList.add("is-error");
       if (skel) skel.remove();
     };
+
     // 兼容已缓存（complete）的图片
     if (img.complete && img.naturalWidth > 0) {
-      done();
+      finish();
       return;
     }
-    img.addEventListener("load", done, { once: true });
-    img.addEventListener("error", done, { once: true });
+    img.addEventListener("load", finish, { once: true });
+    img.addEventListener("error", fail, { once: true });
   }
 
   /* ---------- 转义 ---------- */

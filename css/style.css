@@ -526,6 +526,12 @@ em {
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite linear;
+  opacity: 1;
+  transition: opacity 0.35s var(--ease);
+  pointer-events: none;
+}
+.card__skeleton.fade-out {
+  opacity: 0;
 }
 @keyframes shimmer {
   from {
@@ -592,6 +598,19 @@ em {
 .card:hover .card__view {
   opacity: 1;
   transform: scale(1);
+}
+.card__img-wrap.is-error {
+  background: var(--bg-2);
+}
+.card__img-wrap.is-error::after {
+  content: "图片加载失败";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+  font-size: 13px;
+  background: rgba(11, 11, 20, 0.6);
 }
 
 /* 空状态 */
