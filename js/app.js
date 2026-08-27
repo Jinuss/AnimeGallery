@@ -6,9 +6,10 @@
   "use strict";
 
   const { CATEGORIES, loadCategory } = window.__DATA__;
-  let WALLPAPERS = []; // 当前分类的壁纸数据
-  const catCounts = {}; // 各分类壁纸数量（init 时计算，不随分类切换变化）
-  let totalCount = 0; // 壁纸总数（init 时计算）
+  let WALLPAPERS = [];           // 当前分类的壁纸数据
+  const catCounts = {};          // 各分类壁纸数量（init 时计算，不随分类切换变化）
+  let totalCount = 0;            // 壁纸总数（init 时计算）
+  let imgTimeoutTimer = null;    // 详情弹窗原图加载超时计时器
 
   /* ---------- DOM 引用 ---------- */
   const $ = (sel) => document.querySelector(sel);
@@ -337,19 +338,20 @@
 
     // 加载大图（超时提示）
     els.imgTimeout.style.display = "none";
+    clearTimeout(imgTimeoutTimer);
     const tester = new Image();
-    const timeoutTimer = setTimeout(() => {
+    imgTimeoutTimer = setTimeout(() => {
       els.imgTimeout.style.display = "flex";
     }, IMG_TIMEOUT);
     tester.onload = () => {
-      clearTimeout(timeoutTimer);
+      clearTimeout(imgTimeoutTimer);
       els.imgTimeout.style.display = "none";
       els.modalImg.src = w.src;
       els.modalImg.classList.add("loaded");
       els.imgLoader.classList.add("hide");
     };
     tester.onerror = () => {
-      clearTimeout(timeoutTimer);
+      clearTimeout(imgTimeoutTimer);
       els.imgTimeout.style.display = "none";
       els.modalImg.src = w.src;
       els.imgLoader.classList.add("hide");
@@ -362,6 +364,7 @@
   }
 
   function closeModal() {
+    clearTimeout(imgTimeoutTimer);
     els.modal.classList.remove("open");
     els.modal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
