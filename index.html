@@ -59,6 +59,7 @@
   <!-- ============ 壁纸瀑布流 ============ -->
   <main class="gallery" id="gallery">
     <div class="gallery__masonry" id="masonry"></div>
+    <nav class="gallery__pager" id="pager" aria-label="分页导航" hidden></nav>
     <div class="gallery__empty" id="empty" hidden>
       <span class="gallery__empty-icon">∅</span>
       <p>没有找到符合条件的壁纸</p>
@@ -67,7 +68,7 @@
   </main>
 
   <!-- ============ 加载骨架 ============ -->
-  <div class="loader" id="loader" hidden><span></span></div>
+  <div class="loader" id="loader" ><span></span></div>
 
   <!-- ============ 详情弹窗 ============ -->
   <div class="modal" id="modal" aria-hidden="true" role="dialog" aria-modal="true">

@@ -17,6 +17,8 @@
     statCat: $("#statCat"),
     catsTrack: $("#catsTrack"),
     masonry: $("#masonry"),
+    pager: $("#pager"),
+    gallery: $("#gallery"),
     empty: $("#empty"),
     resetBtn: $("#resetBtn"),
     searchInput: $("#searchInput"),
@@ -36,10 +38,14 @@
   };
 
   /* ---------- 状态 ---------- */
+  const PAGE_SIZE = 10; // 每页卡片数量
+  const PAGER_VISIBLE = 1; // 当前页前后各显示多少个页码
+
   const state = {
     activeCat: "all",
     keyword: "",
     currentId: null,
+    page: 1,
     favorites: new Set(loadFav())
   };
 
@@ -63,11 +69,16 @@
 
   /* ---------- 渲染：分类导航 ---------- */
   function renderCats() {
-    els.catsTrack.innerHTML = CATEGORIES.map(c => `
+    // 预计算各分类壁纸数量（"全部"不显示徽标）
+    const counts = {};
+    WALLPAPERS.forEach(w => { counts[w.category] = (counts[w.category] || 0) + 1; });
+    els.catsTrack.innerHTML = CATEGORIES.map(c => {
+      const badge = c.id === "all" ? "" : `<span class="cat__count">${counts[c.id] || 0}</span>`;
+      return `
       <button class="cat ${c.id === state.activeCat ? "is-active" : ""}" data-cat="${c.id}">
-        <span class="cat__icon">${c.icon}</span>${c.name}
-      </button>
-    `).join("");
+        <span class="cat__icon">${c.icon}</span>${c.name}${badge}
+      </button>`;
+    }).join("");
   }
 
   /* ---------- 渲染：壁纸卡片 ---------- */
@@ -84,15 +95,21 @@
 
   function renderCards() {
     const list = getFiltered();
+    const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+    if (state.page > totalPages) state.page = totalPages;
 
     if (!list.length) {
       els.masonry.innerHTML = "";
       els.empty.style.display = "block";
+      els.pager.hidden = true;
       return;
     }
     els.empty.style.display = "none";
 
-    els.masonry.innerHTML = list.map((w, i) => `
+    const start = (state.page - 1) * PAGE_SIZE;
+    const pageList = list.slice(start, start + PAGE_SIZE);
+
+    els.masonry.innerHTML = pageList.map((w, i) => `
       <article class="card" data-id="${w.id}" style="animation-delay:${Math.min(i, 12) * 60}ms">
         <div class="card__img-wrap">
           <div class="card__skeleton"></div>
@@ -108,6 +125,64 @@
 
     // 绑定加载完成事件以移除骨架屏
     $$(".card__img").forEach(attachImgHandlers);
+    renderPager(list.length, totalPages);
+  }
+
+  /* ---------- 渲染：分页器 ---------- */
+  function renderPager(total, totalPages) {
+    // 只有一页时不显示分页器
+    if (totalPages <= 1) {
+      els.pager.hidden = true;
+      els.pager.innerHTML = "";
+      return;
+    }
+    els.pager.hidden = false;
+
+    const cur = state.page;
+    const items = [];
+
+    // 上一页
+    items.push(pagerNode("‹", cur === 1 ? null : cur - 1, "pager__prev", cur === 1));
+
+    // 页码：始终显示第 1 页与当前页附近，超出部分用省略号
+    const pages = new Set([1, totalPages, cur - PAGER_VISIBLE, cur, cur + PAGER_VISIBLE]);
+    let last = 0;
+    Array.from(pages).filter(p => p >= 1 && p <= totalPages).sort((a, b) => a - b).forEach(p => {
+      if (p - last > 1) items.push(pagerNode("…", null, "pager__ellipsis", true));
+      items.push(pagerNode(String(p), p, p === cur ? "is-active" : "", false));
+      last = p;
+    });
+
+    // 下一页
+    items.push(pagerNode("›", cur === totalPages ? null : cur + 1, "pager__next", cur === totalPages));
+
+    els.pager.innerHTML = items.join("");
+  }
+
+  function pagerNode(label, page, extraClass, disabled) {
+    const cls = ["pager__btn"];
+    if (extraClass) cls.push(extraClass);
+    const dataAttr = page != null ? `data-page="${page}"` : "";
+    const disAttr = disabled ? "aria-disabled=\"true\" tabindex=\"-1\"" : "";
+    return `<button class="${cls.join(" ")}" ${dataAttr} ${disAttr}>${label}</button>`;
+  }
+
+  /* ---------- 切换页码 ---------- */
+  function selectPage(page) {
+    const total = getFiltered().length;
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    if (page < 1 || page > totalPages || page === state.page) return;
+    state.page = page;
+    renderCards();
+    // 滚动到瀑布流顶部（避开 sticky 导航与分类栏）
+    const top = els.gallery.getBoundingClientRect().top + window.scrollY - (varNavH() + 56);
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }
+
+  // 读取 --nav-h 的像素值，用于分页跳转偏移
+  function varNavH() {
+    const v = getComputedStyle(document.documentElement).getPropertyValue("--nav-h").trim();
+    return parseFloat(v) || 64;
   }
 
   /* ---------- 图片加载：移除骨架屏 ---------- */
@@ -139,11 +214,18 @@
     state.activeCat = id;
     // 切换分类时清掉残留搜索词，避免组合筛选导致空状态
     state.keyword = "";
+    state.page = 1;
     els.searchInput.value = "";
     $$(".cat").forEach(b => b.classList.toggle("is-active", b.dataset.cat === id));
-    // 让选中项滚动可见
+    // 让选中项在容器内水平居中（仅滚动容器本身，避免触发整页垂直/水平滚动）
     const active = $$(".cat").find(b => b.dataset.cat === id);
-    if (active) active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    if (active) {
+      const track = els.catsTrack;
+      const trackRect = track.getBoundingClientRect();
+      const btnRect = active.getBoundingClientRect();
+      const delta = (btnRect.left - trackRect.left) + btnRect.width / 2 - track.clientWidth / 2;
+      track.scrollTo({ left: track.scrollLeft + delta, behavior: "smooth" });
+    }
     renderCards();
   }
 
@@ -224,6 +306,7 @@
           $$(".cat").forEach(b => b.classList.toggle("is-active", b.dataset.cat === "all"));
         }
         state.keyword = e.target.value;
+        state.page = 1;
         renderCards();
       }, 180);
     });
@@ -232,6 +315,14 @@
     els.masonry.addEventListener("click", (e) => {
       const card = e.target.closest(".card");
       if (card) openModal(card.dataset.id);
+    });
+
+    // 分页点击
+    els.pager.addEventListener("click", (e) => {
+      const btn = e.target.closest(".pager__btn");
+      if (!btn || btn.hasAttribute("aria-disabled")) return;
+      const p = parseInt(btn.dataset.page, 10);
+      if (!isNaN(p)) selectPage(p);
     });
 
     // 弹窗关闭
@@ -251,6 +342,7 @@
     els.resetBtn.addEventListener("click", () => {
       state.activeCat = "all";
       state.keyword = "";
+      state.page = 1;
       els.searchInput.value = "";
       renderCats();
       renderCards();
@@ -270,7 +362,7 @@
 
   /* ---------- 启动 ---------- */
   function showLoader(on) {
-    if (els.loader) els.loader.style.display = !on ? "block" : "none";
+    if (els.loader) els.loader.style.display = on ? "block" : "none";
     if (on) els.empty.style.display = "none";
   }
 
