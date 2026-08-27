@@ -8,11 +8,7 @@
   <meta name="theme-color" content="#0b0b14" />
   <meta name="description" content="AnimeGallery — 分门别类的精选动漫壁纸浏览 H5" />
   <title>AnimeGallery · 动漫壁纸</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
-    rel="stylesheet" />
+  <link rel="stylesheet" href="./fonts/fonts.css" />
   <link rel="stylesheet" href="./css/style.css" />
 </head>
 
@@ -78,6 +74,10 @@
       <div class="modal__img-wrap">
         <img id="modalImg" alt="" loading="lazy" />
         <div class="modal__img-loader"><span></span></div>
+        <div class="modal__img-timeout" id="modalTimeout" hidden>
+          <p>图片加载超时，图片可能较大</p>
+          <p>请直接点击下方「下载壁纸」</p>
+        </div>
       </div>
       <div class="modal__body">
         <div class="modal__cat" id="modalCat"></div>
