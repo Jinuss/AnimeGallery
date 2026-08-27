@@ -230,7 +230,6 @@ em {
   position: relative;
   display: flex;
   align-items: center;
-  width: 200px;
   max-width: 320px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -253,12 +252,12 @@ em {
   color: var(--text-3);
 }
 .nav__search input {
-  flex: 1;
   height: 38px;
   background: none;
   border: none;
   color: var(--text-1);
   outline: none;
+  width: 150px;
 }
 .nav__search input::placeholder {
   color: var(--text-3);
@@ -419,12 +418,12 @@ em {
   align-items: center;
   justify-content: center;
   border-radius: var(--r-pill);
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 500;
   line-height: 1;
   color: #07070f;
   background: var(--accent);
-  box-shadow: 0 0 0 2px var(--bg-1), 0 3px 8px -2px rgba(34, 211, 238, 0.7);
+  /* box-shadow: 0 0 0 2px var(--bg-1), 0 3px 8px -2px rgba(34, 211, 238, 0.7); */
   pointer-events: none;
   transition: color 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
@@ -434,7 +433,7 @@ em {
 .cat.is-active .cat__count {
   color: var(--primary);
   background: #fff;
-  box-shadow: 0 0 0 2px var(--primary), 0 3px 8px -2px rgba(0, 0, 0, 0.4);
+  /* box-shadow: 0 0 0 2px var(--primary), 0 3px 8px -2px rgba(0, 0, 0, 0.4); */
 }
 
 /* ========================================================================
