@@ -5,8 +5,10 @@
 (function () {
   "use strict";
 
-  const { CATEGORIES, loadWallpapers } = window.__DATA__;
-  let WALLPAPERS = [];
+  const { CATEGORIES, loadCategory } = window.__DATA__;
+  let WALLPAPERS = [];           // 当前分类的壁纸数据
+  const catCounts = {};          // 各分类壁纸数量（init 时计算，不随分类切换变化）
+  let totalCount = 0;            // 壁纸总数（init 时计算）
 
   /* ---------- DOM 引用 ---------- */
   const $ = (sel) => document.querySelector(sel);
@@ -62,18 +64,15 @@
 
   /* ---------- 渲染：统计 ---------- */
   function renderStats() {
-    els.statTotal.textContent = WALLPAPERS.length;
+    els.statTotal.textContent = totalCount;
     els.statCat.textContent = CATEGORIES.filter(c => c.id !== "all").length;
     els.year.textContent = new Date().getFullYear();
   }
 
   /* ---------- 渲染：分类导航 ---------- */
   function renderCats() {
-    // 预计算各分类壁纸数量（"全部"不显示徽标）
-    const counts = {};
-    WALLPAPERS.forEach(w => { counts[w.category] = (counts[w.category] || 0) + 1; });
     els.catsTrack.innerHTML = CATEGORIES.map(c => {
-      const badge = c.id === "all" ? "" : `<span class="cat__count">${counts[c.id] || 0}</span>`;
+      const badge = c.id === "all" ? "" : `<span class="cat__count">${catCounts[c.id] || 0}</span>`;
       return `
       <button class="cat ${c.id === state.activeCat ? "is-active" : ""}" data-cat="${c.id}">
         <span class="cat__icon">${c.icon}</span>${c.name}${badge}
@@ -84,10 +83,8 @@
   /* ---------- 渲染：壁纸卡片 ---------- */
   function getFiltered() {
     const kw = state.keyword.trim().toLowerCase();
+    if (!kw) return WALLPAPERS;
     return WALLPAPERS.filter(w => {
-      const inCat = state.activeCat === "all" || w.category === state.activeCat;
-      if (!inCat) return false;
-      if (!kw) return true;
       const hay = (w.title + " " + w.desc + " " + (w.tags || []).join(" ") + " " + catName(w.category)).toLowerCase();
       return hay.includes(kw);
     });
@@ -220,7 +217,7 @@
   }
 
   /* ---------- 选中分类 ---------- */
-  function selectCat(id) {
+  async function selectCat(id) {
     state.activeCat = id;
     // 切换分类时清掉残留搜索词，避免组合筛选导致空状态
     state.keyword = "";
@@ -236,6 +233,8 @@
       const delta = (btnRect.left - trackRect.left) + btnRect.width / 2 - track.clientWidth / 2;
       track.scrollTo({ left: track.scrollLeft + delta, behavior: "smooth" });
     }
+    // 按需加载该分类数据（命中缓存则零网络请求）
+    WALLPAPERS = await loadCategory(id);
     renderCards();
   }
 
@@ -255,7 +254,7 @@
 
     // 下载链接使用高清原图
     els.modalDownload.href = w.src;
-    els.modalDownload.download = `AnimeGallery_${w.title}.png`;
+    els.modalDownload.download = `AnimeGallery_${w.title}${w.type}`;
 
     // 收藏按钮状态
     syncFavBtn(w.id);
@@ -308,14 +307,15 @@
 
     // 搜索（防抖）—— 搜索视为全局行为，自动回到"全部"分类，避免与分类叠加产生空状态
     let timer;
-    els.searchInput.addEventListener("input", (e) => {
+    els.searchInput.addEventListener("input", () => {
       clearTimeout(timer);
-      timer = setTimeout(() => {
+      timer = setTimeout(async () => {
         if (state.activeCat !== "all") {
           state.activeCat = "all";
+          WALLPAPERS = await loadCategory("all");
           $$(".cat").forEach(b => b.classList.toggle("is-active", b.dataset.cat === "all"));
         }
-        state.keyword = e.target.value;
+        state.keyword = els.searchInput.value;
         state.page = 1;
         renderCards();
       }, 180);
@@ -349,11 +349,12 @@
     });
 
     // 重置筛选
-    els.resetBtn.addEventListener("click", () => {
+    els.resetBtn.addEventListener("click", async () => {
       state.activeCat = "all";
       state.keyword = "";
       state.page = 1;
       els.searchInput.value = "";
+      WALLPAPERS = await loadCategory("all");
       renderCats();
       renderCards();
     });
@@ -379,7 +380,14 @@
   async function init() {
     showLoader(true);
     try {
-      WALLPAPERS = await loadWallpapers();
+      WALLPAPERS = await loadCategory("all");
+      // 计算各分类数量和总数（仅一次，后续切换分类不重复计算）
+      totalCount = WALLPAPERS.length;
+      CATEGORIES.forEach(c => {
+        if (c.id !== "all") {
+          catCounts[c.id] = WALLPAPERS.filter(w => w.category === c.id).length;
+        }
+      });
     } catch (e) {
       console.error("壁纸加载失败:", e);
     }
