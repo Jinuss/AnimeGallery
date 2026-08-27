@@ -113,7 +113,7 @@
       <article class="card" data-id="${w.id}" style="animation-delay:${Math.min(i, 12) * 60}ms">
         <div class="card__img-wrap">
           <div class="card__skeleton"></div>
-          <img class="card__img" src="${w.thumb}" alt="${escapeHtml(w.title)}" loading="lazy" decoding="async" />
+          <img class="card__img" src="${w.thumb}" alt="${escapeHtml(w.title)}" decoding="async" />
           <div class="card__overlay">
             <span class="card__cat">${catName(w.category)}</span>
             <span class="card__title">${escapeHtml(w.title)}</span>
