@@ -335,22 +335,22 @@
     // 收藏按钮状态
     syncFavBtn(w.id);
 
-    // 加载大图（10秒超时提示）
-    els.imgTimeout.hidden = true;
+    // 加载大图（超时提示）
+    els.imgTimeout.style.display = "none";
     const tester = new Image();
     const timeoutTimer = setTimeout(() => {
-      els.imgTimeout.hidden = false;
+      els.imgTimeout.style.display = "flex";
     }, IMG_TIMEOUT);
     tester.onload = () => {
       clearTimeout(timeoutTimer);
-      els.imgTimeout.hidden = true;
+      els.imgTimeout.style.display = "none";
       els.modalImg.src = w.src;
       els.modalImg.classList.add("loaded");
       els.imgLoader.classList.add("hide");
     };
     tester.onerror = () => {
       clearTimeout(timeoutTimer);
-      els.imgTimeout.hidden = true;
+      els.imgTimeout.style.display = "none";
       els.modalImg.src = w.src;
       els.imgLoader.classList.add("hide");
     };
@@ -366,7 +366,7 @@
     els.modal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
     els.modalImg.src = "";
-    els.imgTimeout.hidden = true;
+    els.imgTimeout.style.display = "none";
   }
 
   function syncFavBtn(id) {
