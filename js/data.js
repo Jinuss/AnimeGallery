@@ -10,7 +10,7 @@ const ANIMES = [
   { id: "fanren", name: "凡人修仙传", icon: "☯", file: "data/fanren.json" },
   // { id: "doupo", name: "斗破苍穹", icon: "✦", file: "data/doupo.json" },
   { id: "wanmei", name: "完美世界", icon: "✧", file: "data/wanmei.json" },
-  // { id: "douluo", name: "斗罗大陆", icon: "◈", file: "data/douluo.json" },
+  { id: "nezha", name: "哪吒", icon: "◈", file: "data/nezha.json" },
   // { id: "zhetian", name: "遮天", icon: "☀", file: "data/zhetian.json" },
   { id: "jianlai", name: "剑来", icon: "†", file: "data/jianlai.json" },
 ];
